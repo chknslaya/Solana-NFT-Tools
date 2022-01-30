@@ -1,0 +1,8 @@
+{
+    "airdrop": [
+        {"wallet" : "EXAMPLEHfekpM5XwBd3WcS3LfNTJYQDjShz3oynXDBME", "amount" : 1},
+        {"wallet" : "EXAMPLEHfekpM5XwBd3WcS3LfNTJYQDjShz3oynXDBME", "amount" : 3},
+        {"wallet" : "EXAMPLEHfekpM5XwBd3WcS3LfNTJYQDjShz3oynXDBME", "amount" : 2},
+        {"wallet" : "EXAMPLEHfekpM5XwBd3WcS3LfNTJYQDjShz3oynXDBME", "amount" : 1}
+    ]
+}
