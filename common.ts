@@ -100,3 +100,12 @@ export function sleep(ms: number) {
       setTimeout(resolve, ms);
     });
 }
+
+
+export function getCollectionAccounts(candyMachine: PublicKey): PublicKey[] {
+    var nftAccounts: PublicKey[] = [];
+
+    //TODO: Implement this
+
+    return nftAccounts;
+}

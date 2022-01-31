@@ -16,8 +16,7 @@ var {privateKey, walletList, token, env} = program.opts();
 const fromWallet = initializeWallet(privateKey);
 console.log('Using wallet ' + fromWallet.publicKey);
 
-
-// Read csv for destination wallets
+// Read json for destination wallets
 const destinationWallets: WalletEntry[] = readWalletList(walletList)
 
 // Establish connection for sending tokens
