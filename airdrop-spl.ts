@@ -1,6 +1,6 @@
 import { Connection, clusterApiUrl } from '@solana/web3.js';
 import { program } from 'commander';
-import { initializeWallet, readWalletList, sendToken, sleep, WalletEntry } from './common';
+import { initializeWallet, readWalletList, sendToken, sleep, SLEEP_DURATIONms, WalletEntry } from './common';
 
 program
    .requiredOption('-k, --privateKey <key>', 'Private key of wallet holding items to airdrop')
@@ -23,7 +23,12 @@ const destinationWallets: WalletEntry[] = readWalletList(walletList)
 const connection = new Connection(clusterApiUrl(env), 'confirmed')
 
 // Iterate over each destination wallet
+destinationWallets.forEach(destinationWallet => {
+    sendToken(fromWallet, destinationWallet.wallet, token, destinationWallet.amount, connection);
+    sleep(SLEEP_DURATIONms)
+});
+
 for(var i = 0; i < destinationWallets.length; i++) {
    sendToken(fromWallet, destinationWallets[i].wallet, token, destinationWallets[i].amount, connection);
-   sleep(5000);
+   sleep(SLEEP_DURATIONms);
 }
