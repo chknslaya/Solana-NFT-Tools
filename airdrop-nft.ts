@@ -20,7 +20,7 @@ program
 
 program.parse(process.argv)
 
-var {privateKey, walletList, candyMachineID, env} = program.opts();
+let {privateKey, walletList, candyMachineID, env} = program.opts();
 
 // Initialise source Wallet
 const fromWallet = initializeWallet(privateKey);
