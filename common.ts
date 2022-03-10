@@ -5,6 +5,7 @@ import fs from 'fs'
 import { deserializeUnchecked } from 'borsh';
 import { METADATA_SCHEMA, Metadata} from './metaplex_types'
 
+export const SLEEP_DURATIONms = 5000;
 
 // Given a private key string, initialises a public key wallet
 // Throws exceptions if wallet is not valid
@@ -13,30 +14,31 @@ export function initializeWallet(privateKey: string): Keypair {
 }
 
 export class WalletEntry {
-    public wallet: PublicKey
-    public amount: u64
-    public constructor(_wallet: PublicKey, _amount: u64) {
-        this.wallet = _wallet;
-        this.amount = _amount;
+    public wallet: PublicKey;
+    public amount: u64;
+
+    public constructor(wallet: PublicKey, amount: u64) {
+        this.wallet = wallet;
+        this.amount = amount;
     }
 }
 
-export function readWalletList(filePath: string): any {
-    var walletList: WalletEntry[] = [];
+export function readWalletList(filePath: string): WalletEntry[] {
+    let walletList: WalletEntry[] = [];
     const data = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
     
-    for(var i = 0; i < data.airdrop.length; i++) {
-        walletList.push(new WalletEntry(new PublicKey(data.airdrop[i].wallet), data.airdrop[i].amount));
-    }
+    data.airdrop.forEach(airdropItem =>{
+        walletList.push(new WalletEntry(new PublicKey(airdropItem.wallet), airdropItem.amount));        
+    })
     
     return walletList;
 }
 
 export async function sendToken(fromWallet: Keypair, toWallet: PublicKey, tokenToSend: PublicKey, transferAmount: u64, connection: Connection) : Promise<void> {
-    console.log('Start: Transferring ' + transferAmount + ' to ' + toWallet.toBase58());
+    console.log(`Start: Transferring ${transferAmount} to ${toWallet.toBase58()}`);
     
-    var mintPublicKey = new PublicKey(tokenToSend);    
-    var mintToken = new Token(
+    let mintPublicKey = new PublicKey(tokenToSend);    
+    let mintToken = new Token(
         connection,
         mintPublicKey,
         TOKEN_PROGRAM_ID,
@@ -44,16 +46,16 @@ export async function sendToken(fromWallet: Keypair, toWallet: PublicKey, tokenT
     );
 
     // Get the associated token account for the given pair of {wallet, token}
-    var fromTokenAccount = await mintToken.getOrCreateAssociatedAccountInfo(
+    let fromTokenAccount = await mintToken.getOrCreateAssociatedAccountInfo(
         fromWallet.publicKey
     );
 
     // Check sufficient funds exist in source account
-    if(fromTokenAccount.amount < transferAmount) {
-        throw new Error('Insufficient funds for transfer. Amount for transfer: ' + transferAmount + ' Amount available: ' + fromTokenAccount.amount);
+    if (fromTokenAccount.amount < transferAmount) {
+        throw new Error(`Insufficient funds for transfer. Amount for transfer: ${transferAmount} Amount available: ${fromTokenAccount.amount}`);
     }
     
-    const instructions: TransactionInstruction[] = [];  
+    let instructions: TransactionInstruction[] = [];  
 
     // Retrieve destination token account in toWallet
     const associatedDestinationTokenAddr = await Token.getAssociatedTokenAddress(
@@ -66,7 +68,7 @@ export async function sendToken(fromWallet: Keypair, toWallet: PublicKey, tokenT
     const receiverAccount = await connection.getAccountInfo(associatedDestinationTokenAddr);
 
     // If toWallet doesn't hold an appropriate token account, create one using fromWallet as payer.
-    if (receiverAccount === null) {
+    if (!receiverAccount) {
         instructions.push(
             Token.createAssociatedTokenAccountInstruction(
                 mintToken.associatedProgramId,
@@ -94,13 +96,14 @@ export async function sendToken(fromWallet: Keypair, toWallet: PublicKey, tokenT
     const transaction = new Transaction().add(...instructions);
     await sendAndConfirmTransaction(connection, transaction, [fromWallet], {commitment: "confirmed"})
 
-    console.log('End: Transferred ' + transferAmount + ' to ' + toWallet.toBase58())
+    console.log(`End: Transferred ${transferAmount} to ${toWallet.toBase58()}`)
 }
 
-export function sleep(ms: number) {
-    return new Promise((resolve) => {
+export function sleep(ms: number) : void {
+    const promise = new Promise((resolve) => {
       setTimeout(resolve, ms);
     });
+    promise.then();
 }
 
 
