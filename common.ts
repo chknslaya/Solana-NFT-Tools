@@ -2,6 +2,8 @@ import { u64, Token, TOKEN_PROGRAM_ID } from '@solana/spl-token';
 import { Keypair, PublicKey, Transaction, sendAndConfirmTransaction, Connection, TransactionInstruction } from '@solana/web3.js';
 import  Base58 from 'bs58';
 import fs from 'fs'
+import { deserializeUnchecked } from 'borsh';
+import { METADATA_SCHEMA, Metadata} from './metaplex_types'
 
 
 // Given a private key string, initialises a public key wallet
@@ -102,10 +104,21 @@ export function sleep(ms: number) {
 }
 
 
-export function getCollectionAccounts(candyMachine: PublicKey): PublicKey[] {
-    var nftAccounts: PublicKey[] = [];
+export function decodeMetadata(buffer: Buffer): Metadata {
+    const METADATA_REPLACE = new RegExp('\u0000', 'g');
+    const metadata = deserializeUnchecked(
+    METADATA_SCHEMA,
+    Metadata,
+    buffer,
+    ) as Metadata;
+    metadata.data.name = metadata.data.name.replace(METADATA_REPLACE, '');
+    metadata.data.uri = metadata.data.uri.replace(METADATA_REPLACE, '');
+    metadata.data.symbol = metadata.data.symbol.replace(METADATA_REPLACE, '');
+    return metadata;
+}
 
-    //TODO: Implement this
-
-    return nftAccounts;
+export function getNFTOwner(mintKey: PublicKey, connection: Connection): PublicKey {
+    //TODO: For wallet scrape later
+    
+    return new PublicKey(0);
 }
